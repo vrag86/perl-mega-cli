@@ -32,6 +32,7 @@ my $MEGA_CMD = {
     'mega_mkdir'    => 'mega-mkdir',
     'mega_put'      => 'mega-put',
     'mega_get'      => 'mega-get',
+    'mega_export'   => 'mega-export',
 
 };
 
@@ -57,7 +58,7 @@ sub new {
     for my $cmd (keys %$MEGA_CMD) {
         my $cmd_path = File::Spec->catfile($self->{path}, $MEGA_CMD->{$cmd});
         if (not -f $cmd_path) {
-            croak "Command: $cmd not found: $cmd_path";
+            croak "Command: '$MEGA_CMD->{$cmd}' not found in path: '$cmd_path'";
         }
     }
 
@@ -102,7 +103,6 @@ sub downloadFile {
     my ($self, %opt) = @_;
     my $local_file          = $opt{-local_file}       // croak "You must specify '-local_file' param";
     my $remote_file         = $opt{-remote_file}      // croak "You must specify '-remote_file' param";
-    my $create_dir          = $opt{-create_dir};
     
     my $cmd = File::Spec->catfile($self->{path}, $MEGA_CMD->{mega_get});
     my $res = `$cmd '$remote_file' '$local_file'`;
@@ -123,6 +123,39 @@ sub createDir {
         croak "Can't create folder: $dir. Error: $create_dir_res";
     }
     return 1;
+}
+
+sub shareResource {
+    my ($self, %opt) = @_;
+    $opt{-action}   = '-a';
+    my $res = $self->__share(%opt);
+
+    if ($res =~ /^Exported.+(https:\/\/.+)$/) {
+        return $1;
+    }
+    croak "Can't share resource '$opt{-remote_resource}'. Error: $res";
+}
+
+sub unshareResource {
+    my ($self, %opt) = @_;
+    $opt{-action}   = '-d';
+    my $res = $self->__share(%opt);
+
+    if ($res =~ /^Disabled export/) {
+        return 1;
+    }
+    croak "Can't unshare resource: '$opt{-remote_resource}'. Error: $res";
+}
+
+sub __share {
+    my ($self, %opt)        = @_;
+    my $remote_resource     = $opt{-remote_resource}    // croak "You must specify param '-remote_resource'";
+    my $action              = $opt{-action};
+
+    my $cmd = File::Spec->catfile($self->{path}, $MEGA_CMD->{mega_export});
+    my $res = `$cmd $action -f '$remote_resource'`;
+
+    return $res;
 }
 
 sub logout {
@@ -181,7 +214,14 @@ This module use to upload, download, share file from Mega account. Module work o
     );
 
     #Download file
-    my $
+    $mega->downloadFile(
+            -local_file     => $local_file,
+            -remote_file    => $remote_file,
+    );
+
+    #Share file
+    my $share_link = $mega->shareResource($remote_file);
+
 
 =head1 METHODS
 
@@ -210,25 +250,38 @@ Logout from mega account
 Upload file from local disk to mega cloud. Return 1 if success, die in otherwise
 
     %opt:
-       -local_file      => Full path to source file on local disk
-       -remote_file     => Full path to remote file on cloud 
-       -create_dir      => Create dir on cloud if dir not exists (default: 0)
+       -local_file          => Full path to source file on local disk
+       -remote_file         => Full path to remote file on cloud 
+       -create_dir          => Create dir on cloud if dir not exists (default: 0)
 
 =head2 downloadFile(%opt)
 
 Download file from mega cloud to local disk. Return 1 if success, die in otherwise
 
     %opt:
-       -local_file      => Full path to source file on local disk
-       -remote_file     => Full path to remote file on cloud 
-       -create_dir      => Create dir on cloud if dir not exists (default: 0)
+       -local_file          => Full path to source file on local disk
+       -remote_file         => Full path to remote file on cloud 
 
 =head2 createDir(%opt)
 
 Create dir on mega cloud
     
     %opt:
-        -dir            => Dir name to create on mega cloud
+        -dir                => Dir name to create on mega cloud
+
+=head2 shareResource(%opt) 
+
+Share resource (file/folder) and get url to download resource. Return share link if success, die in otherwise
+
+    %opt:
+        -remote_resource    => Full path to remote resource to share
+
+=head2 unshareResource(%opt) 
+
+Unshare resource (file/folder). Return 1 if success, die in otherwise
+
+    %opt:
+        -remote_resource    => Full path to remote resource to unshare
 
 =head1 DEPENDENCE
 

@@ -43,6 +43,8 @@ testCreateDir($mega);
 my $remote_file = testUploadFile($mega, $UPLOAD_FILE);
 testDownloadFile($mega, $remote_file);
 
+testShareFile($mega, $remote_file);
+
 
 
 sub testCreateSeveralObject {
@@ -65,7 +67,7 @@ sub createMegaObj {
         };
         if ($@) {
             if ($@ =~ /^Command:/) {
-                print "Not found mega in path: $path\n";
+                print $@;
             }
             else {
                 die $@;
@@ -138,6 +140,32 @@ sub testDownloadFile {
                     );
     ok($res, "Download file");
     ok(-e $dest_file, "Download file exists")
+}
+
+sub testShareFile {
+    my ($mega, $remote_file) = @_;
+
+    my $res;
+    $res = $mega->shareResource(
+                    -remote_resource    => $remote_file,
+                );
+    like($res, qr/^https.+/, "Test share resource: $remote_file ok. Share link: $res");
+
+    #Test share not exists file
+    eval {
+        $mega->shareResource(
+            -remote_resource        => 'not_exists_file',
+        );
+    };
+    like($@, qr/Node not found/, "Test share not exists resource");
+
+    #Unshare
+    $res = $mega->unshareResource(
+                    -remote_resource    => $remote_file,
+    );
+    ok ($res, "Test unshare resource");
+    
+
 }
 
 

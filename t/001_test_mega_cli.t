@@ -37,6 +37,15 @@ isa_ok ($mega, 'Mega::Cli');
 
 testCreateSeveralObject();
 
+if (not defined $MEGA_LOGIN) {
+    print "Not defined env: 'MEGA_LOGIN'";
+    exit 0;
+}
+if (not defined $MEGA_PASSWORD) {
+    print "Not defined env: 'MEGA_PASSWORD'";
+    exit 0;
+}
+
 testMegaLogin();
 testCreateDir($mega);
 
@@ -83,22 +92,18 @@ sub createMegaObj {
 }
 
 sub testMegaLogin {
-    SKIP: {
-        skip "Not defined env: 'MEGA_LOGIN'" if not defined $MEGA_LOGIN;
-        skip "Not defined env: 'MEGA_PASSWORD'" if not defined $MEGA_PASSWORD;
-        eval {
-            $mega->login(
-                            -login      => $MEGA_LOGIN,
-                            -password   => '',
-                        );
-        };
-        ok ($@, "Fail Login to mega: $@");
-        my $login_res = $mega->login(
+    eval {
+        $mega->login(
                         -login      => $MEGA_LOGIN,
-                        -password   => $MEGA_PASSWORD,
+                        -password   => '',
                     );
-        ok ($login_res, 'Login to mega');
     };
+    ok ($@, "Fail Login to mega: $@");
+    my $login_res = $mega->login(
+                    -login      => $MEGA_LOGIN,
+                    -password   => $MEGA_PASSWORD,
+                );
+    ok ($login_res, 'Login to mega');
 }
 
 sub testCreateDir {

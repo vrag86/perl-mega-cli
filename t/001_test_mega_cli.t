@@ -23,7 +23,7 @@ use File::Spec;
 use File::Basename;
 use Data::Printer;
 
-use Test::More 'no_plan';                      # last test to print
+use Test::More 'no_plan';
 
 
 my $MEGA_LOGIN          = $ENV{MEGA_LOGIN};
@@ -38,11 +38,11 @@ isa_ok ($mega, 'Mega::Cli');
 testCreateSeveralObject();
 
 if (not defined $MEGA_LOGIN) {
-    print "Not defined env: 'MEGA_LOGIN'";
+    diag ("Not defined env: 'MEGA_LOGIN'");
     exit 0;
 }
 if (not defined $MEGA_PASSWORD) {
-    print "Not defined env: 'MEGA_PASSWORD'";
+    diag ("Not defined env: 'MEGA_PASSWORD'");
     exit 0;
 }
 
@@ -53,7 +53,6 @@ my $remote_file = testUploadFile($mega, $UPLOAD_FILE);
 testDownloadFile($mega, $remote_file);
 
 testShareFile($mega, $remote_file);
-
 
 
 sub testCreateSeveralObject {
@@ -169,8 +168,6 @@ sub testShareFile {
                     -remote_resource    => $remote_file,
     );
     ok ($res, "Test unshare resource");
-    
-
 }
 
 

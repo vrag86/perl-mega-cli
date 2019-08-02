@@ -186,6 +186,7 @@ sub DESTROY {
 B<Mega::Cli> - simple wrapper for Mega.nz cli
 
 =head1 VERSION
+
     version 0.01
 
 =head1 SYNOPSIS

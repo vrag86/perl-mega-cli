@@ -24,7 +24,7 @@ use Lock::Socket;
 use File::Basename;
 use Carp qw/carp croak/;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 my $MEGA_CMD = {
     'mega_login'    => 'mega-login',
@@ -186,6 +186,7 @@ sub DESTROY {
 B<Mega::Cli> - simple wrapper for Mega.nz cli
 
 =head1 VERSION
+
     version 0.01
 
 =head1 SYNOPSIS

@@ -11,9 +11,9 @@ WriteMakefile(
     AUTHOR            => 'Pavel Andryushin',
     VERSION_FROM      => 'lib/Mega/Cli.pm', 
     PREREQ_PM         => {
-        'File::Spec'        => 3.48_01,
-        'Lock::Socket'      => 0.0.6,
-        'File::Basename'    => 2.85,
+        'File::Spec'        => 0,
+        'Lock::Socket'      => 0,
+        'File::Basename'    => 0,
     },
     META_MERGE   => {
           requires  => { perl => '5.008008' },
